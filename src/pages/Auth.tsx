@@ -35,7 +35,13 @@ const Auth = () => {
       const { error } = await signIn(formData.email, formData.password);
       
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+        if (error.message.includes('Email not confirmed')) {
+          toast({
+            title: "E-posta Onayı Gerekli",
+            description: "Lütfen e-posta adresinizi kontrol edin ve onay linkine tıklayın. Veya geliştirici ayarlarından e-posta onayını devre dışı bırakın.",
+            variant: "destructive"
+          });
+        } else if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "Giriş Hatası",
             description: "E-posta veya şifre hatalı. Lütfen tekrar deneyin.",
@@ -110,7 +116,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Kayıt Başarılı!",
-          description: "Hesabınız oluşturuldu. Artık giriş yapabilirsiniz."
+          description: "Hesabınız oluşturuldu. E-posta onayı gerekiyorsa lütfen e-postanızı kontrol edin. Geliştirme için Supabase ayarlarından e-posta onayını devre dışı bırakabilirsiniz."
         });
         // Clear form
         setFormData({
