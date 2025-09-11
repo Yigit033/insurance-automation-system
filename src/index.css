@@ -2,95 +2,163 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Insurance Document Automation System Design System
+All colors MUST be HSL - Professional insurance industry theme
 */
 
 @layer base {
   :root {
+    /* Base colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 213 31% 9%;
 
+    /* Card system */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 213 31% 9%;
 
+    /* Popover system */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 213 31% 9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary brand colors - Deep insurance blue */
+    --primary: 213 94% 18%;
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 213 94% 25%;
+    --primary-glow: 213 94% 35%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary colors - Trustworthy navy */
+    --secondary: 220 26% 95%;
+    --secondary-foreground: 213 94% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted colors */
+    --muted: 220 26% 95%;
+    --muted-foreground: 213 19% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent colors - Professional teal */
+    --accent: 185 57% 50%;
+    --accent-foreground: 0 0% 98%;
+    --accent-hover: 185 57% 42%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Success colors - Document processed */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --success-light: 142 69% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Warning colors - Validation issues */
+    --warning: 48 96% 53%;
+    --warning-foreground: 213 31% 9%;
+    --warning-light: 48 100% 96%;
 
-    --radius: 0.5rem;
+    /* Destructive colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --sidebar-background: 0 0% 98%;
+    /* Border and input */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 213 94% 18%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Custom insurance colors */
+    --insurance-blue: 213 94% 18%;
+    --insurance-light-blue: 213 70% 95%;
+    --insurance-navy: 213 31% 9%;
+    --insurance-gray: 220 9% 46%;
+    --insurance-light-gray: 220 14% 96%;
+    
+    /* Processing status colors */
+    --processing: 259 94% 51%;
+    --processing-light: 259 100% 96%;
+    
+    /* Document type colors */
+    --policy-blue: 213 94% 18%;
+    --claim-orange: 25 95% 53%;
+    --report-purple: 259 94% 51%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--insurance-blue)), hsl(var(--accent)));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 26% 98%));
 
+    /* Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(var(--insurance-blue) / 0.1);
+    --shadow-elevated: 0 10px 25px -3px hsl(var(--insurance-blue) / 0.1);
+    --shadow-processing: 0 0 20px hsl(var(--processing) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 213 31% 9%;
+    --sidebar-foreground: 220 26% 95%;
+    --sidebar-primary: 213 94% 18%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 213 31% 15%;
+    --sidebar-accent-foreground: 220 26% 95%;
+    --sidebar-border: 213 31% 20%;
+    --sidebar-ring: 213 94% 18%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 213 31% 9%;
+    --foreground: 220 26% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 213 31% 12%;
+    --card-foreground: 220 26% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 213 31% 12%;
+    --popover-foreground: 220 26% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 213 94% 45%;
+    --primary-foreground: 213 31% 9%;
+    --primary-hover: 213 94% 52%;
+    --primary-glow: 213 94% 60%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 213 31% 15%;
+    --secondary-foreground: 220 26% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 213 31% 15%;
+    --muted-foreground: 220 14% 71%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 185 57% 50%;
+    --accent-foreground: 213 31% 9%;
+    --accent-hover: 185 57% 58%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 142 84% 42%;
+    --success-foreground: 213 31% 9%;
+    --success-light: 142 69% 15%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 213 31% 9%;
+    --warning-light: 48 100% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 26% 95%;
+
+    --border: 213 31% 20%;
+    --input: 213 31% 20%;
+    --ring: 213 94% 45%;
+
+    --insurance-blue: 213 94% 45%;
+    --insurance-light-blue: 213 70% 15%;
+    --insurance-navy: 220 26% 95%;
+    --insurance-gray: 220 14% 71%;
+    --insurance-light-gray: 213 31% 15%;
+
+    --processing: 259 94% 65%;
+    --processing-light: 259 100% 15%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 84% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--insurance-blue)), hsl(var(--accent)));
+    --gradient-card: linear-gradient(145deg, hsl(213 31% 12%), hsl(213 31% 15%));
+
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 10px 25px -3px hsl(0 0% 0% / 0.4);
+    --shadow-processing: 0 0 20px hsl(var(--processing) / 0.4);
   }
 }
 
