@@ -14,7 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      document_fields: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          document_id: string
+          field_name: string
+          field_type: string
+          field_value: string | null
+          id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          document_id: string
+          field_name: string
+          field_type: string
+          field_value?: string | null
+          id?: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          document_id?: string
+          field_name?: string
+          field_type?: string
+          field_value?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_fields_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_search: {
+        Row: {
+          content_text: string | null
+          created_at: string
+          document_id: string
+          id: string
+          search_vector: unknown | null
+        }
+        Insert: {
+          content_text?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          search_vector?: unknown | null
+        }
+        Update: {
+          content_text?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          search_vector?: unknown | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_search_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          extracted_data: Json | null
+          file_size: number
+          file_type: string
+          file_url: string | null
+          filename: string
+          id: string
+          ocr_confidence: number | null
+          original_filename: string
+          processing_time: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          extracted_data?: Json | null
+          file_size: number
+          file_type: string
+          file_url?: string | null
+          filename: string
+          id?: string
+          ocr_confidence?: number | null
+          original_filename: string
+          processing_time?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          extracted_data?: Json | null
+          file_size?: number
+          file_type?: string
+          file_url?: string | null
+          filename?: string
+          id?: string
+          ocr_confidence?: number | null
+          original_filename?: string
+          processing_time?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
