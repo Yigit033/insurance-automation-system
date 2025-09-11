@@ -12,8 +12,20 @@ import {
   Zap
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const { 
+    totalDocuments, 
+    todayProcessed, 
+    inQueue, 
+    successRate, 
+    recentDocuments, 
+    loading 
+  } = useDashboardStats();
+
   // Mock günlük işlem verileri
   const dailyProcessing = [
     { time: "09:00", processed: 12 },
@@ -26,12 +38,13 @@ const Dashboard = () => {
     { time: "16:00", processed: 38 },
   ];
 
-  const recentDocuments = [
-    { name: "kasko_police_2024_001.pdf", customer: "Ahmet Yılmaz", status: "completed", time: "2 dk önce" },
-    { name: "hasar_raporu_034.jpg", customer: "Fatma Demir", status: "processing", time: "5 dk önce" },
-    { name: "ekspertiz_raporu.pdf", customer: "Mehmet Kaya", status: "completed", time: "8 dk önce" },
-    { name: "trafik_sigortasi.png", customer: "Ayşe Özkan", status: "completed", time: "12 dk önce" },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-insurance-gray">Yükleniyor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -57,34 +70,34 @@ const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Bugün İşlenen"
-          value="127"
-          description="↗︎ 23% geçen haftaya göre"
+          title="Toplam Belge"
+          value={totalDocuments.toString()}
+          description="Sistemde kayıtlı belgeler"
           icon={FileText}
-          trend="up"
+          trend="neutral"
           color="primary"
         />
         <StatsCard
+          title="Bugün İşlenen"
+          value={todayProcessed.toString()}
+          description="Bugün tamamlanan işlemler"
+          icon={CheckCircle}
+          trend="up"
+          color="success"
+        />
+        <StatsCard
           title="İşleme Kuyruğu"
-          value="8"
-          description="Ortalama 3dk bekleme"
+          value={inQueue.toString()}
+          description="Bekleyen belgeler"
           icon={Clock}
           trend="neutral"
           color="warning"
         />
         <StatsCard
           title="Başarı Oranı"
-          value="94.2%"
-          description="↗︎ 2.1% artış"
-          icon={CheckCircle}
-          trend="up"
-          color="success"
-        />
-        <StatsCard
-          title="Zaman Tasarrufu"
-          value="18.5 saat"
-          description="Bu hafta otomatik işlem"
-          icon={Zap}
+          value={`${successRate}%`}
+          description="Başarıyla işlenen belgeler"
+          icon={Target}
           trend="up"
           color="accent"
         />
@@ -140,35 +153,46 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentDocuments.map((doc, index) => (
+              {recentDocuments.length > 0 ? recentDocuments.map((doc, index) => (
                 <div key={index} className="flex items-start space-x-3 p-3 bg-background rounded-lg border border-border">
                   <div className="flex-shrink-0">
                     <FileText className="w-8 h-8 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-insurance-navy truncate">
-                      {doc.name}
+                      {doc.original_filename}
                     </p>
                     <p className="text-xs text-insurance-gray">
-                      {doc.customer}
+                      {doc.extracted_data?.customer_name || 'Müşteri bilgisi yok'}
                     </p>
                     <div className="flex items-center justify-between mt-1">
                       <span 
                         className={`text-xs px-2 py-1 rounded-full ${
                           doc.status === 'completed' 
                             ? 'bg-success-light text-success' 
-                            : 'bg-processing-light text-processing'
+                            : doc.status === 'processing'
+                            ? 'bg-processing-light text-processing'
+                            : doc.status === 'failed'
+                            ? 'bg-destructive-light text-destructive'
+                            : 'bg-warning-light text-warning'
                         }`}
                       >
-                        {doc.status === 'completed' ? 'Tamamlandı' : 'İşleniyor'}
+                        {doc.status === 'completed' ? 'Tamamlandı' : 
+                         doc.status === 'processing' ? 'İşleniyor' :
+                         doc.status === 'failed' ? 'Hata' : 'Yükleniyor'}
                       </span>
                       <span className="text-xs text-insurance-gray">
-                        {doc.time}
+                        {new Date(doc.created_at).toLocaleString('tr-TR')}
                       </span>
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-insurance-gray">
+                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Henüz belge yüklenmemiş</p>
+                </div>
+              )}
             </div>
             <Button 
               variant="ghost" 

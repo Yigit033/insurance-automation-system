@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { useDocuments } from "@/hooks/useDocuments";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UploadedFile {
   id: string;
@@ -26,6 +28,8 @@ interface UploadedFile {
 
 const FileUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const { uploadDocument } = useDocuments();
+  const { user } = useAuth();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
@@ -37,9 +41,15 @@ const FileUpload = () => {
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
 
-    // Simulate upload and processing
-    newFiles.forEach((fileData) => {
-      simulateFileProcessing(fileData.id);
+    // Upload and process files
+    newFiles.forEach(async (fileData) => {
+      try {
+        await uploadDocument(fileData.file);
+        updateFileStatus(fileData.id, "completed", 100);
+      } catch (error) {
+        console.error('Upload error:', error);
+        updateFileStatus(fileData.id, "error", 0);
+      }
     });
 
     toast({

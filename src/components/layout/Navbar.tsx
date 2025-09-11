@@ -9,6 +9,7 @@ import {
   Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import UserMenu from "@/components/UserMenu";
 
 const Navbar = () => {
   const location = useLocation();
@@ -63,13 +64,7 @@ const Navbar = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-insurance-blue text-insurance-blue hover:bg-insurance-light-blue"
-            >
-              Profil
-            </Button>
+            <UserMenu />
           </div>
         </div>
       </div>
