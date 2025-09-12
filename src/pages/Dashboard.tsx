@@ -1,5 +1,10 @@
 import StatsCard from "@/components/dashboard/StatsCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts';
+import { DataExport } from '@/components/export/DataExport';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
 import { 
   FileText, 
@@ -7,12 +12,10 @@ import {
   CheckCircle, 
   TrendingUp, 
   Upload,
-  Users,
-  Target,
-  Zap
+  BarChart3,
+  AlertCircle
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
@@ -23,8 +26,9 @@ const Dashboard = () => {
     inQueue, 
     successRate, 
     recentDocuments, 
-    loading 
+    loading: statsLoading 
   } = useDashboardStats();
+  const { analytics, loading: analyticsLoading } = useAnalytics();
 
   // Mock günlük işlem verileri
   const dailyProcessing = [
@@ -38,7 +42,7 @@ const Dashboard = () => {
     { time: "16:00", processed: 38 },
   ];
 
-  if (loading) {
+  if (statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-insurance-gray">Yükleniyor...</div>
@@ -97,193 +101,190 @@ const Dashboard = () => {
           title="Başarı Oranı"
           value={`${successRate}%`}
           description="Başarıyla işlenen belgeler"
-          icon={Target}
+          icon={TrendingUp}
           trend="up"
           color="accent"
         />
       </div>
 
-      {/* Charts and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Processing Chart */}
-        <Card className="lg:col-span-2 bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-              <TrendingUp className="w-5 h-5" />
-              <span>Günlük İşlem Grafiği</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {dailyProcessing.map((data, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <span className="text-xs font-medium text-insurance-gray w-12">
-                    {data.time}
-                  </span>
-                  <div className="flex-1">
-                    <Progress 
-                      value={(data.processed / 50) * 100} 
-                      className="h-3"
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-insurance-navy w-8">
-                    {data.processed}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-border">
-              <div className="flex justify-between text-sm">
-                <span className="text-insurance-gray">Toplam Bugün:</span>
-                <span className="font-semibold text-insurance-navy">
-                  {dailyProcessing.reduce((sum, data) => sum + data.processed, 0)} belge
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
+          <TabsTrigger value="analytics">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analitik
+          </TabsTrigger>
+          <TabsTrigger value="export">Dışa Aktarım</TabsTrigger>
+        </TabsList>
 
-        {/* Recent Documents */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-              <Clock className="w-5 h-5" />
-              <span>Son İşlemler</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentDocuments.length > 0 ? recentDocuments.map((doc, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-background rounded-lg border border-border">
-                  <div className="flex-shrink-0">
-                    <FileText className="w-8 h-8 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-insurance-navy truncate">
-                      {doc.original_filename}
-                    </p>
-                    <p className="text-xs text-insurance-gray">
-                      {doc.extracted_data?.customer_name || 'Müşteri bilgisi yok'}
-                    </p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span 
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          doc.status === 'completed' 
-                            ? 'bg-success-light text-success' 
-                            : doc.status === 'processing'
-                            ? 'bg-processing-light text-processing'
-                            : doc.status === 'failed'
-                            ? 'bg-destructive-light text-destructive'
-                            : 'bg-warning-light text-warning'
-                        }`}
-                      >
-                        {doc.status === 'completed' ? 'Tamamlandı' : 
-                         doc.status === 'processing' ? 'İşleniyor' :
-                         doc.status === 'failed' ? 'Hata' : 'Yükleniyor'}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Charts and Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Processing Chart */}
+            <Card className="lg:col-span-2 bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-insurance-navy">
+                  <TrendingUp className="w-5 h-5" />
+                  <span>Günlük İşlem Grafiği</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {dailyProcessing.map((data, index) => (
+                    <div key={index} className="flex items-center space-x-4">
+                      <span className="text-xs font-medium text-insurance-gray w-12">
+                        {data.time}
                       </span>
-                      <span className="text-xs text-insurance-gray">
-                        {new Date(doc.created_at).toLocaleString('tr-TR')}
+                      <div className="flex-1">
+                        <Progress 
+                          value={(data.processed / 50) * 100} 
+                          className="h-3"
+                        />
+                      </div>
+                      <span className="text-xs font-semibold text-insurance-navy w-8">
+                        {data.processed}
                       </span>
                     </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-insurance-gray">Toplam Bugün:</span>
+                    <span className="font-semibold text-insurance-navy">
+                      {dailyProcessing.reduce((sum, data) => sum + data.processed, 0)} belge
+                    </span>
                   </div>
                 </div>
-              )) : (
-                <div className="text-center py-8 text-insurance-gray">
-                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Henüz belge yüklenmemiş</p>
+              </CardContent>
+            </Card>
+
+            {/* Recent Documents */}
+            <Card className="bg-gradient-card shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-insurance-navy">
+                  <Clock className="w-5 h-5" />
+                  <span>Son İşlemler</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentDocuments.length > 0 ? recentDocuments.map((doc, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-background rounded-lg border border-border">
+                      <div className="flex-shrink-0">
+                        <FileText className="w-8 h-8 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-insurance-navy truncate">
+                          {doc.original_filename}
+                        </p>
+                        <p className="text-xs text-insurance-gray">
+                          {doc.extracted_data?.customer_name || 'Müşteri bilgisi yok'}
+                        </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <span 
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              doc.status === 'completed' 
+                                ? 'bg-success-light text-success' 
+                                : doc.status === 'processing'
+                                ? 'bg-processing-light text-processing'
+                                : doc.status === 'failed'
+                                ? 'bg-destructive-light text-destructive'
+                                : 'bg-warning-light text-warning'
+                            }`}
+                          >
+                            {doc.status === 'completed' ? 'Tamamlandı' : 
+                             doc.status === 'processing' ? 'İşleniyor' :
+                             doc.status === 'failed' ? 'Hata' : 'Yükleniyor'}
+                          </span>
+                          <span className="text-xs text-insurance-gray">
+                            {new Date(doc.created_at).toLocaleString('tr-TR')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-center py-8 text-insurance-gray">
+                      <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>Henüz belge yüklenmemiş</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Button 
-              variant="ghost" 
-              className="w-full mt-4 text-primary hover:bg-insurance-light-blue"
-            >
-              Tümünü Görüntüle
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full mt-4 text-primary hover:bg-insurance-light-blue"
+                  onClick={() => window.location.href = '/documents'}
+                >
+                  Tümünü Görüntüle
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-      {/* Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-              <Target className="w-5 h-5" />
-              <span>OCR Doğruluk</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-insurance-gray">TC Kimlik</span>
-                <span className="text-sm font-semibold text-insurance-navy">98.5%</span>
-              </div>
-              <Progress value={98.5} className="h-2" />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-insurance-gray">Poliçe No</span>
-                <span className="text-sm font-semibold text-insurance-navy">96.2%</span>
-              </div>
-              <Progress value={96.2} className="h-2" />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-insurance-gray">Plaka</span>
-                <span className="text-sm font-semibold text-insurance-navy">94.8%</span>
-              </div>
-              <Progress value={94.8} className="h-2" />
+        <TabsContent value="analytics" className="space-y-6">
+          {analyticsLoading ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="h-80 bg-gradient-card animate-pulse rounded-lg"></div>
+              <div className="h-80 bg-gradient-card animate-pulse rounded-lg"></div>
+              <div className="h-80 bg-gradient-card animate-pulse rounded-lg"></div>
+              <div className="h-80 bg-gradient-card animate-pulse rounded-lg"></div>
             </div>
-          </CardContent>
-        </Card>
+          ) : analytics ? (
+            <AnalyticsCharts analytics={analytics} />
+          ) : (
+            <Card className="bg-gradient-card shadow-card">
+              <CardContent className="p-6 text-center text-insurance-gray">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-semibold text-insurance-navy mb-2">
+                  Analitik verileri yüklenemiyor
+                </h3>
+                <p>Lütfen daha sonra tekrar deneyin</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-              <Users className="w-5 h-5" />
-              <span>Kullanıcı Aktivitesi</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-insurance-gray">Aktif Kullanıcılar</span>
-                <span className="text-2xl font-bold text-insurance-navy">12</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-insurance-gray">Bu Hafta Yeni</span>
-                <span className="text-lg font-semibold text-success">+3</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-insurance-gray">Toplam İşlem</span>
-                <span className="text-lg font-semibold text-insurance-navy">2,847</span>
-              </div>
+        <TabsContent value="export" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <Card className="bg-gradient-card shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-insurance-navy">Dışa Aktarım Özeti</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-bold text-primary">
+                          {analytics?.total_documents || 0}
+                        </div>
+                        <div className="text-sm text-insurance-gray">Toplam Belge</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-primary">
+                          {analytics?.processed_documents || 0}
+                        </div>
+                        <div className="text-sm text-insurance-gray">İşlenmiş Belge</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-primary">
+                          {analytics ? Object.keys(analytics.documents_by_type).length : 0}
+                        </div>
+                        <div className="text-sm text-insurance-gray">Farklı Tür</div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-insurance-gray">
+                      Tüm belgeleriniz ve OCR ile çıkarılan veriler dışa aktarılabilir.
+                      Bu, yedekleme, analiz veya başka sistemlere aktarım için idealdir.
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-              <Zap className="w-5 h-5" />
-              <span>Sistem Performansı</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-insurance-gray">Ortalama İşlem Süresi</span>
-                <span className="text-lg font-semibold text-insurance-navy">24s</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-insurance-gray">Sistem Kullanımı</span>
-                <span className="text-lg font-semibold text-accent">68%</span>
-              </div>
-              <Progress value={68} className="h-2" />
-              <div className="text-xs text-success">↗︎ Performans optimal</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <DataExport />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
