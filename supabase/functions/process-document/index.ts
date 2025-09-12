@@ -19,7 +19,8 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, fileContent, fileType } = await req.json();
+    const requestBody = await req.json();
+    const { documentId, fileContent, fileType } = requestBody;
 
     console.log(`Processing document ${documentId} of type ${fileType}`);
 
@@ -88,7 +89,15 @@ GÖREV: Verilen sigorta belgesindeki tüm metni çıkar ve aşağıdaki formatta
 
       if (response.ok) {
         const data = await response.json();
-        const result = JSON.parse(data.choices[0].message.content);
+        const content = data.choices[0].message.content;
+        
+        // Handle markdown-wrapped JSON responses
+        let cleanContent = content;
+        if (content.includes('```json')) {
+          cleanContent = content.replace(/```json\n?/, '').replace(/\n?```$/, '');
+        }
+        
+        const result = JSON.parse(cleanContent);
         extractedText = result.raw_text;
         ocrConfidence = result.confidence;
 
@@ -185,16 +194,20 @@ GÖREV: Verilen sigorta belgesindeki tüm metni çıkar ve aşağıdaki formatta
   } catch (error) {
     console.error('Error processing document:', error);
 
-    // Update document status to failed
-    if (req.body) {
-      const { documentId } = await req.json();
-      await supabase
-        .from('documents')
-        .update({ 
-          status: 'failed',
-          error_message: error.message 
-        })
-        .eq('id', documentId);
+    // Update document status to failed using requestBody from try block
+    try {
+      const { documentId } = requestBody;
+      if (documentId) {
+        await supabase
+          .from('documents')
+          .update({ 
+            status: 'failed',
+            error_message: error.message 
+          })
+          .eq('id', documentId);
+      }
+    } catch (updateError) {
+      console.error('Error updating document status:', updateError);
     }
 
     return new Response(
