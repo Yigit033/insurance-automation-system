@@ -173,7 +173,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_analytics: {
+        Args: { user_id_param: string }
+        Returns: {
+          avg_confidence: number
+          avg_processing_time: number
+          documents_by_type: Json
+          failed_documents: number
+          monthly_uploads: Json
+          processed_documents: number
+          total_documents: number
+        }[]
+      }
+      search_documents: {
+        Args: {
+          date_from?: string
+          date_to?: string
+          document_type_filter?: string
+          search_query?: string
+          user_id_param: string
+        }
+        Returns: {
+          created_at: string
+          extracted_data: Json
+          file_type: string
+          filename: string
+          id: string
+          ocr_confidence: number
+          original_filename: string
+          search_rank: number
+          status: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
