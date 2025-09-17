@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Insurance Automation System
 
 ## Project info
 
@@ -49,6 +49,29 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## Development
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Create env file
+
+Copy `.env.example` to `.env` and fill:
+
+```env
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+3. Run locally
+
+```bash
+npm run dev
+```
 
 ## What technologies are used for this project?
 

@@ -14,7 +14,10 @@ interface AdvancedSearchFormProps {
 }
 
 export function AdvancedSearchForm({ filters, onFiltersChange, onClear, loading }: AdvancedSearchFormProps) {
-  const [localFilters, setLocalFilters] = useState(filters);
+  const [localFilters, setLocalFilters] = useState({
+    ...filters,
+    documentType: filters.documentType || 'all'
+  });
 
   const handleSearch = () => {
     onFiltersChange(localFilters);
@@ -23,7 +26,7 @@ export function AdvancedSearchForm({ filters, onFiltersChange, onClear, loading 
   const handleClear = () => {
     const clearedFilters = {
       query: '',
-      documentType: '',
+      documentType: 'all',
       dateFrom: '',
       dateTo: ''
     };
@@ -65,7 +68,7 @@ export function AdvancedSearchForm({ filters, onFiltersChange, onClear, loading 
                 <SelectValue placeholder="Tür seçin" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tümü</SelectItem>
+                <SelectItem value="all">Tümü</SelectItem>
                 <SelectItem value="kasko">Kasko</SelectItem>
                 <SelectItem value="trafik">Trafik</SelectItem>
                 <SelectItem value="hasar">Hasar</SelectItem>

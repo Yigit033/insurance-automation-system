@@ -25,130 +25,112 @@ import {
   MoreHorizontal,
   FileText,
   Calendar,
-  User
+  User,
+  Car,
+  Phone,
+  MapPin,
+  Shield,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
-
-interface Document {
-  id: string;
-  fileName: string;
-  uploadDate: string;
-  status: "completed" | "processing" | "error";
-  customerName: string;
-  nationalId: string;
-  policyNumber: string;
-  vehiclePlate?: string;
-  amount: string;
-  documentType: "policy" | "claim" | "report";
-  confidence: number;
-}
-
-// Mock data - sigorta belgeleri
-const mockDocuments: Document[] = [
-  {
-    id: "1",
-    fileName: "kasko_police_2024_001.pdf",
-    uploadDate: "2024-01-15",
-    status: "completed",
-    customerName: "Ahmet Yılmaz",
-    nationalId: "12345678901",
-    policyNumber: "POL-2024-001",
-    vehiclePlate: "34 ABC 123",
-    amount: "15.000 ₺",
-    documentType: "policy",
-    confidence: 96
-  },
-  {
-    id: "2",
-    fileName: "hasar_raporu_034.jpg",
-    uploadDate: "2024-01-14",
-    status: "completed",
-    customerName: "Fatma Demir",
-    nationalId: "98765432109",
-    policyNumber: "POL-2024-002",
-    vehiclePlate: "06 XYZ 789",
-    amount: "8.500 ₺",
-    documentType: "claim",
-    confidence: 89
-  },
-  {
-    id: "3",
-    fileName: "ekspertiz_raporu.pdf",
-    uploadDate: "2024-01-13",
-    status: "processing",
-    customerName: "Mehmet Kaya",
-    nationalId: "55667788990",
-    policyNumber: "POL-2024-003",
-    amount: "12.750 ₺",
-    documentType: "report",
-    confidence: 0
-  },
-  {
-    id: "4",
-    fileName: "trafik_sigortasi.png",
-    uploadDate: "2024-01-12",
-    status: "completed",
-    customerName: "Ayşe Özkan",
-    nationalId: "11223344556",
-    policyNumber: "TRF-2024-001",
-    vehiclePlate: "35 DEF 456",
-    amount: "2.300 ₺",
-    documentType: "policy",
-    confidence: 94
-  }
-];
+import { useDocuments, Document } from "@/hooks/useDocuments";
+import { DocumentDetailModal } from "./DocumentDetailModal";
 
 const DocumentsTable = () => {
-  const [documents] = useState<Document[]>(mockDocuments);
+  const { documents, loading, deleteDocument } = useDocuments();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const filteredDocuments = documents.filter(doc => {
+    const extractedData = doc.extracted_data as any;
     const matchesSearch = 
-      doc.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.policyNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      doc.original_filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (extractedData?.customer_name && extractedData.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (extractedData?.policy_number && extractedData.policy_number.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === "all" || doc.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: Document["status"]) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-success text-success-foreground">Tamamlandı</Badge>;
+        return <Badge className="bg-success text-success-foreground flex items-center gap-1"><CheckCircle className="w-3 h-3" />Tamamlandı</Badge>;
       case "processing":
-        return <Badge className="bg-processing text-white">İşleniyor</Badge>;
-      case "error":
-        return <Badge variant="destructive">Hata</Badge>;
+        return <Badge className="bg-processing text-white flex items-center gap-1"><Clock className="w-3 h-3" />İşleniyor</Badge>;
+      case "failed":
+        return <Badge variant="destructive" className="flex items-center gap-1"><XCircle className="w-3 h-3" />Hata</Badge>;
+      case "uploading":
+        return <Badge variant="outline" className="flex items-center gap-1"><Clock className="w-3 h-3" />Yükleniyor</Badge>;
+      default:
+        return <Badge variant="outline" className="flex items-center gap-1"><AlertCircle className="w-3 h-3" />Bilinmeyen</Badge>;
     }
   };
 
-  const getDocumentTypeBadge = (type: Document["documentType"]) => {
-    switch (type) {
-      case "policy":
-        return <Badge variant="outline" className="border-policy-blue text-policy-blue">Poliçe</Badge>;
-      case "claim":
-        return <Badge variant="outline" className="border-claim-orange text-claim-orange">Hasar</Badge>;
-      case "report":
-        return <Badge variant="outline" className="border-report-purple text-report-purple">Rapor</Badge>;
+  const handleViewDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDocument(null);
+  };
+
+  const getDocumentTypeBadge = (documentType: string) => {
+    switch (documentType) {
+      case "kasko":
+        return <Badge variant="outline" className="border-blue-500 text-blue-500">Kasko Sigortası</Badge>;
+      case "trafik":
+        return <Badge variant="outline" className="border-green-500 text-green-500">Trafik Sigortası</Badge>;
+      case "deprem":
+        return <Badge variant="outline" className="border-red-500 text-red-500">Deprem Sigortası</Badge>;
+      case "hasar":
+        return <Badge variant="outline" className="border-orange-500 text-orange-500">Hasar Raporu</Badge>;
+      case "ekspertiz":
+        return <Badge variant="outline" className="border-purple-500 text-purple-500">Ekspertiz Raporu</Badge>;
+      case "insurance_policy":
+        return <Badge variant="outline" className="border-indigo-500 text-indigo-500">Sigorta Poliçesi</Badge>;
+      default:
+        return <Badge variant="outline" className="border-gray-500 text-gray-500">Bilinmeyen</Badge>;
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('tr-TR');
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const exportToCSV = () => {
     const csvContent = [
-      ["Dosya Adı", "Yüklenme Tarihi", "Durum", "Müşteri Adı", "TC Kimlik", "Poliçe No", "Plaka", "Tutar", "Güven Skoru"].join(","),
-      ...filteredDocuments.map(doc => [
-        doc.fileName,
-        doc.uploadDate,
-        doc.status === "completed" ? "Tamamlandı" : doc.status === "processing" ? "İşleniyor" : "Hata",
-        doc.customerName,
-        doc.nationalId,
-        doc.policyNumber,
-        doc.vehiclePlate || "",
-        doc.amount,
-        doc.confidence.toString()
-      ].join(","))
+      ["Dosya Adı", "Yüklenme Tarihi", "Durum", "Müşteri Adı", "TC Kimlik", "Poliçe No", "Plaka", "Tutar", "Güven Skoru", "Belge Türü"].join(","),
+      ...filteredDocuments.map(doc => {
+        const extractedData = doc.extracted_data as any;
+        return [
+          doc.original_filename,
+          formatDate(doc.created_at),
+          doc.status === "completed" ? "Tamamlandı" : doc.status === "processing" ? "İşleniyor" : "Hata",
+          extractedData?.customer_name || "",
+          extractedData?.national_id || "",
+          extractedData?.policy_number || "",
+          extractedData?.vehicle_plate || "",
+          extractedData?.amount || "",
+          doc.ocr_confidence ? `${doc.ocr_confidence}%` : "0%",
+          extractedData?.document_type || "bilinmeyen"
+        ].join(",");
+      })
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -162,161 +144,246 @@ const DocumentsTable = () => {
     document.body.removeChild(link);
   };
 
+  if (loading) {
+    return (
+      <Card className="bg-gradient-card shadow-card">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-pulse text-insurance-gray">Belgeler yükleniyor...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
+    <>
     <Card className="bg-gradient-card shadow-card">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-          <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-            <FileText className="w-5 h-5" />
-            <span>İşlenmiş Belgeler</span>
-          </CardTitle>
-          
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-insurance-gray" />
-              <Input
-                placeholder="Belgeler, müşteriler, poliçe ara..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full sm:w-64"
-              />
-            </div>
-
-            {/* Filter */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="border-insurance-blue text-insurance-blue">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filtrele
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => setStatusFilter("all")}>
-                  Tüm Durumlar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("completed")}>
-                  Tamamlandı
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("processing")}>
-                  İşleniyor
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("error")}>
-                  Hata
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Export */}
-            <Button 
-              onClick={exportToCSV} 
-              className="bg-gradient-primary text-primary-foreground hover:bg-primary-hover"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Dışa Aktar
+        <CardTitle className="flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Belgeler ({filteredDocuments.length})
+          </span>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={exportToCSV}>
+              <Download className="h-4 w-4 mr-2" />
+              CSV İndir
             </Button>
           </div>
-        </div>
+        </CardTitle>
       </CardHeader>
-
       <CardContent>
-        <div className="rounded-lg border border-border overflow-hidden">
+        {/* Search and Filter */}
+        <div className="flex gap-4 mb-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Belge, müşteri veya poliçe numarası ile ara..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <div className="w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-border rounded-md bg-background"
+            >
+              <option value="all">Tüm Durumlar</option>
+              <option value="completed">Tamamlandı</option>
+              <option value="processing">İşleniyor</option>
+              <option value="failed">Hata</option>
+              <option value="uploading">Yükleniyor</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
-              <TableRow className="bg-insurance-light-gray">
-                <TableHead className="font-semibold text-insurance-navy">Belge</TableHead>
-                <TableHead className="font-semibold text-insurance-navy">Müşteri Bilgileri</TableHead>
-                <TableHead className="font-semibold text-insurance-navy">Poliçe/Hasar</TableHead>
-                <TableHead className="font-semibold text-insurance-navy">Durum</TableHead>
-                <TableHead className="font-semibold text-insurance-navy">Güven Skoru</TableHead>
-                <TableHead className="font-semibold text-insurance-navy">İşlemler</TableHead>
+              <TableRow>
+                <TableHead>Belge</TableHead>
+                <TableHead>Müşteri</TableHead>
+                <TableHead>Poliçe Bilgileri</TableHead>
+                <TableHead>Araç</TableHead>
+                <TableHead>Tutar</TableHead>
+                <TableHead>Durum</TableHead>
+                <TableHead>Güven</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDocuments.map((doc) => (
-                <TableRow key={doc.id} className="hover:bg-insurance-light-gray/50">
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium text-insurance-navy">{doc.fileName}</div>
-                      <div className="flex items-center space-x-2 text-xs text-insurance-gray">
-                        <Calendar className="w-3 h-3" />
-                        <span>{doc.uploadDate}</span>
-                        {getDocumentTypeBadge(doc.documentType)}
-                      </div>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-insurance-gray" />
-                        <span className="font-medium text-insurance-navy">{doc.customerName}</span>
-                      </div>
-                      <div className="text-xs text-insurance-gray">TC: {doc.nationalId}</div>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium text-insurance-navy">{doc.policyNumber}</div>
-                      {doc.vehiclePlate && (
-                        <div className="text-xs text-insurance-gray">Plaka: {doc.vehiclePlate}</div>
-                      )}
-                      <div className="text-sm font-semibold text-accent">{doc.amount}</div>
-                    </div>
-                  </TableCell>
-                  
-                  <TableCell>
-                    {getStatusBadge(doc.status)}
-                  </TableCell>
-                  
-                  <TableCell>
-                    {doc.status === "completed" && (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 bg-insurance-light-gray rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              doc.confidence >= 90 ? 'bg-success' :
-                              doc.confidence >= 75 ? 'bg-warning' : 'bg-destructive'
-                            }`}
-                            style={{ width: `${doc.confidence}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-insurance-gray">{doc.confidence}%</span>
-                      </div>
-                    )}
-                  </TableCell>
-                  
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem>
-                          <Eye className="w-4 h-4 mr-2" />
-                          Görüntüle
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Download className="w-4 h-4 mr-2" />
-                          İndir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {filteredDocuments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Henüz belge bulunamadı</p>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredDocuments.map((doc) => {
+                  const extractedData = doc.extracted_data as any;
+                  return (
+                    <TableRow key={doc.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-sm">{doc.original_filename}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(doc.created_at)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatFileSize(doc.file_size)}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        {extractedData?.customer_name ? (
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="font-medium">{extractedData.customer_name}</div>
+                              {extractedData.national_id && (
+                                <div className="text-xs text-muted-foreground">
+                                  TC: {extractedData.national_id}
+                                </div>
+                              )}
+                              {extractedData.phone && (
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {extractedData.phone}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      
+                      <TableCell>
+                        {extractedData?.policy_number ? (
+                          <div>
+                            <div className="font-medium">{extractedData.policy_number}</div>
+                            {extractedData.insurance_company && (
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Shield className="h-3 w-3" />
+                                {extractedData.insurance_company}
+                              </div>
+                            )}
+                            {extractedData.start_date && (
+                              <div className="text-xs text-muted-foreground">
+                                Başlangıç: {extractedData.start_date}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      
+                      <TableCell>
+                        {extractedData?.vehicle_plate ? (
+                          <div className="flex items-center gap-2">
+                            <Car className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <div className="font-medium">{extractedData.vehicle_plate}</div>
+                              {extractedData.vehicle_brand && extractedData.vehicle_model && (
+                                <div className="text-xs text-muted-foreground">
+                                  {extractedData.vehicle_brand} {extractedData.vehicle_model}
+                                  {extractedData.vehicle_year && ` (${extractedData.vehicle_year})`}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      
+                      <TableCell>
+                        {extractedData?.amount ? (
+                          <div className="font-medium text-green-600">{extractedData.amount}</div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="flex flex-col gap-2">
+                          {getStatusBadge(doc.status)}
+                          {extractedData?.document_type && getDocumentTypeBadge(extractedData.document_type)}
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        {doc.ocr_confidence ? (
+                          <div className="flex items-center gap-1">
+                            <div className={`w-2 h-2 rounded-full ${
+                              doc.ocr_confidence >= 90 ? 'bg-green-500' :
+                              doc.ocr_confidence >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`} />
+                            <span className="text-sm font-medium">{doc.ocr_confidence}%</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDocument(doc)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Görüntüle
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Download className="h-4 w-4 mr-2" />
+                              İndir
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={() => deleteDocument(doc.id)}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Sil
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>
-
-        <div className="mt-4 text-sm text-insurance-gray">
-          Toplam {filteredDocuments.length} belge gösteriliyor
-        </div>
       </CardContent>
     </Card>
+
+    {/* Document Detail Modal */}
+    <DocumentDetailModal
+      document={selectedDocument}
+      isOpen={isModalOpen}
+      onClose={handleCloseModal}
+    />
+    </>
   );
 };
 

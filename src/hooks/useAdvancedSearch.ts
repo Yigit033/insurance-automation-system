@@ -26,7 +26,7 @@ export function useAdvancedSearch() {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
-    documentType: '',
+    documentType: 'all',
     dateFrom: '',
     dateTo: ''
   });
@@ -40,7 +40,7 @@ export function useAdvancedSearch() {
       const { data, error } = await supabase.rpc('search_documents', {
         user_id_param: user.id,
         search_query: searchFilters.query,
-        document_type_filter: searchFilters.documentType,
+        document_type_filter: searchFilters.documentType === 'all' ? '' : searchFilters.documentType,
         date_from: searchFilters.dateFrom ? new Date(searchFilters.dateFrom).toISOString() : null,
         date_to: searchFilters.dateTo ? new Date(searchFilters.dateTo).toISOString() : null
       });
@@ -64,7 +64,7 @@ export function useAdvancedSearch() {
   const clearFilters = () => {
     const clearedFilters = {
       query: '',
-      documentType: '',
+      documentType: 'all',
       dateFrom: '',
       dateTo: ''
     };

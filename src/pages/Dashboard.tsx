@@ -3,6 +3,8 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts';
 import { DataExport } from '@/components/export/DataExport';
+import { QueueMonitor } from '@/components/queue/QueueMonitor';
+import { ProcessingLogs } from '@/components/queue/ProcessingLogs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
@@ -108,12 +110,13 @@ const Dashboard = () => {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Genel Bakış</TabsTrigger>
           <TabsTrigger value="analytics">
             <BarChart3 className="h-4 w-4 mr-2" />
             Analitik
           </TabsTrigger>
+          <TabsTrigger value="logs">İşlem Logları</TabsTrigger>
           <TabsTrigger value="export">Dışa Aktarım</TabsTrigger>
         </TabsList>
 
@@ -158,66 +161,8 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Recent Documents */}
-            <Card className="bg-gradient-card shadow-card">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-insurance-navy">
-                  <Clock className="w-5 h-5" />
-                  <span>Son İşlemler</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentDocuments.length > 0 ? recentDocuments.map((doc, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-background rounded-lg border border-border">
-                      <div className="flex-shrink-0">
-                        <FileText className="w-8 h-8 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-insurance-navy truncate">
-                          {doc.original_filename}
-                        </p>
-                        <p className="text-xs text-insurance-gray">
-                          {doc.extracted_data?.customer_name || 'Müşteri bilgisi yok'}
-                        </p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span 
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              doc.status === 'completed' 
-                                ? 'bg-success-light text-success' 
-                                : doc.status === 'processing'
-                                ? 'bg-processing-light text-processing'
-                                : doc.status === 'failed'
-                                ? 'bg-destructive-light text-destructive'
-                                : 'bg-warning-light text-warning'
-                            }`}
-                          >
-                            {doc.status === 'completed' ? 'Tamamlandı' : 
-                             doc.status === 'processing' ? 'İşleniyor' :
-                             doc.status === 'failed' ? 'Hata' : 'Yükleniyor'}
-                          </span>
-                          <span className="text-xs text-insurance-gray">
-                            {new Date(doc.created_at).toLocaleString('tr-TR')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="text-center py-8 text-insurance-gray">
-                      <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p>Henüz belge yüklenmemiş</p>
-                    </div>
-                  )}
-                </div>
-                <Button 
-                  variant="ghost" 
-                  className="w-full mt-4 text-primary hover:bg-insurance-light-blue"
-                  onClick={() => window.location.href = '/documents'}
-                >
-                  Tümünü Görüntüle
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Queue Monitor */}
+            <QueueMonitor />
           </div>
         </TabsContent>
 
@@ -242,6 +187,12 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="logs" className="space-y-6">
+          <div className="grid gap-6">
+            <ProcessingLogs />
+          </div>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">

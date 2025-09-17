@@ -223,12 +223,36 @@ const FileUpload = () => {
 
                       {/* Extracted Data Preview */}
                       {fileData.extractedData && (
-                        <div className="mt-2 p-2 bg-success-light rounded text-xs">
-                          <div className="grid grid-cols-2 gap-2">
-                            <span><strong>Müşteri:</strong> {fileData.extractedData.customerName}</span>
-                            <span><strong>TC:</strong> {fileData.extractedData.nationalId}</span>
-                            <span><strong>Poliçe:</strong> {fileData.extractedData.policyNumber}</span>
-                            <span><strong>Plaka:</strong> {fileData.extractedData.vehiclePlate}</span>
+                        <div className="mt-2 p-3 bg-success-light rounded-lg text-xs">
+                          <div className="font-semibold text-success mb-2 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Çıkarılan Veriler
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {fileData.extractedData.customer_name && (
+                              <span><strong>Müşteri:</strong> {fileData.extractedData.customer_name}</span>
+                            )}
+                            {fileData.extractedData.national_id && (
+                              <span><strong>TC:</strong> {fileData.extractedData.national_id}</span>
+                            )}
+                            {fileData.extractedData.policy_number && (
+                              <span><strong>Poliçe:</strong> {fileData.extractedData.policy_number}</span>
+                            )}
+                            {fileData.extractedData.vehicle_plate && (
+                              <span><strong>Plaka:</strong> {fileData.extractedData.vehicle_plate}</span>
+                            )}
+                            {fileData.extractedData.amount && (
+                              <span><strong>Tutar:</strong> {fileData.extractedData.amount}</span>
+                            )}
+                            {fileData.extractedData.document_type && (
+                              <span><strong>Tür:</strong> {fileData.extractedData.document_type}</span>
+                            )}
+                            {fileData.extractedData.insurance_company && (
+                              <span><strong>Şirket:</strong> {fileData.extractedData.insurance_company}</span>
+                            )}
+                            {fileData.extractedData.vehicle_brand && fileData.extractedData.vehicle_model && (
+                              <span><strong>Araç:</strong> {fileData.extractedData.vehicle_brand} {fileData.extractedData.vehicle_model}</span>
+                            )}
                           </div>
                         </div>
                       )}

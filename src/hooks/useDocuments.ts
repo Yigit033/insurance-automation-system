@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { processDocument } from '@/api/process-document';
 
 export interface Document {
   id: string;
@@ -73,29 +74,49 @@ export function useDocuments() {
     if (docError) throw docError;
 
     // Convert file to base64 for processing
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result?.toString().split(',')[1];
-      
-      // Call edge function to process document
-      const { error: processError } = await supabase.functions.invoke('process-document', {
-        body: {
-          documentId: docData.id,
-          fileContent: base64,
-          fileType: file.type
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result?.toString().split(',')[1];
+        if (result) {
+          resolve(result);
+        } else {
+          reject(new Error('Failed to convert file to base64'));
         }
-      });
+      };
+      reader.onerror = () => reject(new Error('FileReader error'));
+      reader.readAsDataURL(file);
+    });
 
-      if (processError) {
-        console.error('Error processing document:', processError);
-        // Update status to failed
-        await supabase
-          .from('documents')
-          .update({ status: 'failed', error_message: processError.message })
-          .eq('id', docData.id);
+    try {
+      console.log('🚀 Processing document with Node.js API...');
+      console.log(`📄 Document ID: ${docData.id}`);
+      console.log(`📄 File Type: ${file.type}`);
+      console.log(`📊 Base64 Length: ${base64.length}`);
+
+      // Call Node.js API to process document
+      const result = await processDocument(docData.id, base64, file.type);
+
+      if (result.success) {
+        console.log('✅ Document processing completed successfully:', result.data);
+        
+        // Reload documents to show updated status
+        await fetchDocuments();
+      } else {
+        throw new Error('Document processing failed');
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('❌ Unexpected error during processing:', error);
+      // Update status to failed
+      await supabase
+        .from('documents')
+        .update({ 
+          status: 'failed', 
+          error_message: error instanceof Error ? error.message : 'Unknown error'
+        })
+        .eq('id', docData.id);
+      throw error;
+    }
 
     return docData;
   };
