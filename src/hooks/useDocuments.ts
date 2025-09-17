@@ -1,7 +1,103 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { processDocument } from '@/api/process-document';
+// Import removed - processDocument functionality will be inline
+
+// Inline document processing function
+async function processDocumentInline(documentId: string, fileContent: string, fileType: string) {
+  try {
+    console.log('🚀 Processing document:', documentId);
+    
+    // Call OCR.space API
+    console.log('🔍 Calling OCR.space API...');
+    const ocrApiKey = 'K85897734888957';
+    
+    const ocrFormData = new FormData();
+    ocrFormData.append('apikey', ocrApiKey);
+    ocrFormData.append('base64Image', `data:${fileType};base64,${fileContent}`);
+    ocrFormData.append('language', 'tur');
+    ocrFormData.append('isOverlayRequired', 'false');
+    ocrFormData.append('detectOrientation', 'true');
+    ocrFormData.append('scale', 'true');
+    ocrFormData.append('OCREngine', '2');
+    
+    const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      body: ocrFormData
+    });
+    
+    const ocrData = await ocrResponse.json();
+    console.log('📝 OCR response received');
+    
+    if (!ocrData.ParsedResults || ocrData.ParsedResults.length === 0) {
+      throw new Error('OCR failed to extract text');
+    }
+    
+    const extractedText = ocrData.ParsedResults[0].ParsedText;
+    console.log('📊 Extracted text length:', extractedText.length);
+    
+    // Simple document type detection
+    let documentType = 'unknown';
+    if (extractedText.includes('DEPREM') || extractedText.includes('Deprem')) {
+      documentType = 'deprem';
+    } else if (extractedText.includes('KASKO') || extractedText.includes('Kasko')) {
+      documentType = 'kasko';
+    } else if (extractedText.includes('TRAFİK') || extractedText.includes('Trafik')) {
+      documentType = 'trafik';
+    }
+    
+    console.log('📋 Detected document type:', documentType);
+    
+    // Simple field extraction (you can expand this)
+    const extractedFields = {
+      policy_number: extractPolicyNumber(extractedText),
+      insured_name: extractInsuredName(extractedText),
+      // Add more field extractions as needed
+    };
+    
+    console.log('📋 Extracted fields:', extractedFields);
+    
+    // Update document in Supabase
+    const { error } = await supabase
+      .from('documents')
+      .update({
+        status: 'completed',
+        extracted_data: {
+          document_type: documentType,
+          extracted_fields: extractedFields,
+          raw_text: extractedText
+        },
+        ocr_confidence: ocrData.ParsedResults[0].TextOverlay?.HasOverlay ? 0.9 : 0.7,
+        processed_at: new Date().toISOString()
+      })
+      .eq('id', documentId);
+    
+    if (error) {
+      console.error('❌ Database update error:', error);
+      throw new Error(`Database update failed: ${error.message}`);
+    }
+    
+    console.log('✅ Document processing completed successfully');
+    return { success: true, data: { documentType, extractedFields } };
+    
+  } catch (error) {
+    console.error('❌ Error processing document:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper functions for field extraction
+function extractPolicyNumber(text: string): string | null {
+  const policyRegex = /(?:POLİÇE|POLICE|Poliçe)\s*(?:NO|No|NUMARASI|Numarası)?\s*:?\s*([A-Z0-9\-\/]+)/i;
+  const match = text.match(policyRegex);
+  return match ? match[1].trim() : null;
+}
+
+function extractInsuredName(text: string): string | null {
+  const nameRegex = /(?:SİGORTALI|SIGORTAL|Sigortalı|ADI|Adı)\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i;
+  const match = text.match(nameRegex);
+  return match ? match[1].trim() : null;
+}
 
 export interface Document {
   id: string;
@@ -94,8 +190,8 @@ export function useDocuments() {
       console.log(`📄 File Type: ${file.type}`);
       console.log(`📊 Base64 Length: ${base64.length}`);
 
-      // Call Node.js API to process document
-      const result = await processDocument(docData.id, base64, file.type);
+      // Process document inline using Supabase client
+      const result = await processDocumentInline(docData.id, base64, file.type);
 
       if (result.success) {
         console.log('✅ Document processing completed successfully:', result.data);
