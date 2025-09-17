@@ -340,29 +340,17 @@ function calculateConfidenceScore(text: string, fields: any): number {
 
 function extractPolicyNumberAdvanced(text: string): string | null {
   const patterns = [
-    // Pattern: Line with colon followed by 8-10 digits (typical policy number)
-    /:([0-9]{8,10})/g,
-    // Pattern: "Sigorta Sirketi Poliçe No" followed by number
+    // Pattern: "Sigorta Sirketi Poliçe No" followed by number (HIGHEST PRIORITY)
     /Sigorta Sirketi Poliçe No\s*:?\s*([0-9]+)/i,
-    // Pattern: "Poliçe No" followed by number
-    /Poliçe No\s*:?\s*([0-9]+)/i,
+    // Pattern: "Poliçe No" but NOT "DASK Poliçe No"
+    /(?<!DASK\s+)Poliçe No\s*:?\s*([0-9]+)/i,
     // Generic policy pattern
     /Policy\s*(?:Number|No)\s*:?\s*([A-Z0-9\-\/\.]+)/i
   ];
   
   for (const pattern of patterns) {
-    if (pattern.global) {
-      // For global patterns, get all matches and filter
-      const matches = [...text.matchAll(pattern)];
-      for (const match of matches) {
-        if (match[1] && match[1].length >= 8) {
-          return match[1].trim();
-        }
-      }
-    } else {
-      const match = text.match(pattern);
-      if (match && match[1]) return match[1].trim();
-    }
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
   }
   
   return null;
@@ -370,7 +358,10 @@ function extractPolicyNumberAdvanced(text: string): string | null {
 
 function extractDaskPolicyNumber(text: string): string | null {
   const patterns = [
+    // Pattern: "DASK Pollçe No" with typo in OCR
     /DASK\s+Pollçe\s+No\s*:?\s*([0-9]+)/i,
+    // Pattern: Correct spelling
+    /DASK\s+Poliçe\s+No\s*:?\s*([0-9]+)/i,
     /DASK\s+Policy\s+No\s*:?\s*([0-9]+)/i
   ];
   
@@ -388,6 +379,8 @@ function extractInsuredNameAdvanced(text: string): string | null {
     /Adi Soyadi\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
     // Pattern: "SIGORTALI BILGILERI" section with name after
     /SİGORTALI BILGILERI[\s\S]*?Adi Soyadi\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Pattern: Look for "EMRAH TILAVER" specifically in SIGORTALI section
+    /SİGORTALI BILGILERI[\s\S]*?([A-ZÇĞIİÖŞÜ]+\s+[A-ZÇĞIİÖŞÜ]+)(?=\s*\n?\s*TCKN|$)/i,
     // Generic name pattern after specific labels
     /(?:SİGORTALI|SIGORTAL|Sigortalı)\s+(?:ADI|Adı)\s*\/?\s*(?:SOYADI|Soyadi|UNVANI|Unvani)?\s*:?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i
   ];
@@ -415,6 +408,8 @@ function extractPolicyHolderName(text: string): string | null {
   const patterns = [
     // Pattern: "Adi Soyadt/Unvani" in SIGORTA ETTIREN section
     /SİGORTA ETTIREN BILGILER[\s\S]*?Adi Soyadt\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Pattern: Look for name in SIGORTA ETTIREN section
+    /SİGORTA ETTIREN BILGILER[\s\S]*?([A-ZÇĞIİÖŞÜ]+\s+[A-ZÇĞIİÖŞÜ]+)(?=\s*\n?\s*TCKN|$)/i,
     // Pattern: "Adi Soyadt/Unvani" followed by name
     /Adi Soyadt\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
     // Generic policyholder pattern
@@ -447,7 +442,9 @@ function extractCustomerName(text: string): string | null {
 
 function extractStartDate(text: string): string | null {
   const patterns = [
+    // Pattern: "Baslangiç Tarihi" followed by colon and date
     /Baslangiç Tarihi\s*:?\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i,
+    // Pattern: Generic start date patterns
     /(?:Başlangıç|Start)\s+(?:Tarihi|Date)\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i,
     /Policy\s+Start\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i
   ];
@@ -462,7 +459,9 @@ function extractStartDate(text: string): string | null {
 
 function extractEndDate(text: string): string | null {
   const patterns = [
+    // Pattern: "Bitig Tarihi" followed by colon and date
     /Bitig Tarihi\s*:?\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i,
+    // Pattern: Generic end date patterns
     /(?:Bitiş|End)\s+(?:Tarihi|Date)\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i,
     /Policy\s+End\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i
   ];
@@ -477,7 +476,9 @@ function extractEndDate(text: string): string | null {
 
 function extractIssueDate(text: string): string | null {
   const patterns = [
+    // Pattern: "Tanzim Tarihi" followed by colon and date
     /Tanzim Tarihi\s*:?\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i,
+    // Pattern: Generic issue date patterns
     /(?:Tanzim|Issue)\s+(?:Tarihi|Date)\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i,
     /Issue\s+Date\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i
   ];
@@ -580,6 +581,7 @@ function extractRenewalNumber(text: string): string | null {
 // DEPREM/KONUT specific extractions
 function extractAddressCode(text: string): string | null {
   const patterns = [
+    // Pattern: "Adres Kodu" followed by colon and number
     /Adres Kodu\s*:?\s*([0-9]+)/i,
     /Address\s+Code\s*:?\s*([0-9]+)/i
   ];
@@ -594,6 +596,7 @@ function extractAddressCode(text: string): string | null {
 
 function extractBuildingCode(text: string): string | null {
   const patterns = [
+    // Pattern: "Bina Kodu" followed by colon and number
     /Bina Kodu\s*:?\s*([0-9]+)/i,
     /Building\s+Code\s*:?\s*([0-9]+)/i
   ];
