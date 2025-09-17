@@ -162,55 +162,129 @@ function detectDocumentType(text: string): string {
   return 'unknown';
 }
 
-// Professional field extraction with comprehensive patterns
+// Professional field extraction aligned with fieldMapping.ts
 function extractFieldsFromText(text: string, documentType: string): any {
   const fields: any = {};
   
-  // Common fields for all document types - using proven patterns
-  fields.policy_number = extractPolicyNumberAdvanced(text);
-  fields.insured_name = extractInsuredNameAdvanced(text);
-  fields.policyholderName = extractPolicyHolderName(text);
-  fields.customer_name = extractCustomerName(text);
-  fields.startDate = extractStartDate(text);
-  fields.endDate = extractEndDate(text);
-  fields.issueDate = extractIssueDate(text);
-  fields.policyPremium = extractPolicyPremium(text);
-  fields.insuranceCompany = extractInsuranceCompany(text);
-  fields.company_phone = extractCompanyPhone(text);
-  fields.agencyNumber = extractAgencyNumber(text);
-  fields.renewalNumber = extractRenewalNumber(text);
+  // UNIVERSAL FIELDS - matching fieldMapping.ts exactly
   
-  // Document type specific fields with advanced patterns
+  // Customer Information
+  fields.insured_name = extractInsuredNameAdvanced(text);
+  fields.customer_name = extractCustomerName(text);
+  fields.policyholderName = extractPolicyHolderName(text);
+  
+  // Policy Information  
+  fields.policy_number = extractPolicyNumberAdvanced(text);
+  fields.policyNumber = extractPolicyNumberAdvanced(text); // Alternative field name
+  fields.daskPolicyNumber = extractDaskPolicyNumber(text);
+  
+  // Dates
+  fields.start_date = extractStartDate(text);
+  fields.startDate = extractStartDate(text); // Alternative field name
+  fields.end_date = extractEndDate(text);
+  fields.endDate = extractEndDate(text); // Alternative field name
+  fields.issue_date = extractIssueDate(text);
+  fields.issueDate = extractIssueDate(text); // Alternative field name
+  
+  // Company Information
+  fields.insurance_company = extractInsuranceCompany(text);
+  fields.insuranceCompany = extractInsuranceCompany(text); // Alternative field name
+  fields.company_phone = extractCompanyPhone(text);
+  fields.companyPhone = extractCompanyPhone(text); // Alternative field name
+  fields.company_address = extractCompanyAddress(text);
+  fields.companyAddress = extractCompanyAddress(text); // Alternative field name
+  
+  // Coverage Information
+  fields.buildingCoverage = extractBuildingCoverage(text); // For coverageType
+  fields.buildingCoverageAmount = extractBuildingCoverageAmount(text); // For coverageAmount
+  
+  // Financial Information
+  fields.policyPremium = extractPolicyPremium(text);
+  fields.policy_premium = extractPolicyPremium(text); // Alternative field name
+  fields.gross_premium = extractGrossPremium(text);
+  fields.grossPremium = extractGrossPremium(text); // Alternative field name
+  fields.net_premium = extractNetPremium(text);
+  fields.netPremium = extractNetPremium(text); // Alternative field name
+  fields.tax_amount = extractTaxAmount(text);
+  fields.taxAmount = extractTaxAmount(text); // Alternative field name
+  
+  // Agency Information
+  fields.agencyNumber = extractAgencyNumber(text);
+  fields.agency_number = extractAgencyNumber(text); // Alternative field name
+  fields.renewalNumber = extractRenewalNumber(text);
+  fields.renewal_number = extractRenewalNumber(text); // Alternative field name
+  
+  // Discount Information
+  fields.discountSurchargeInfo = extractDiscountInfo(text);
+  fields.discount_info = extractDiscountInfo(text); // Alternative field name
+  
+  // DOCUMENT TYPE SPECIFIC FIELDS
+  
   if (documentType === 'deprem' || documentType === 'konut') {
-    // DEPREM/KONUT specific fields
-    fields.daskPolicyNumber = extractDaskPolicyNumber(text);
-    fields.addressCode = extractAddressCode(text);
+    // Building Information
     fields.buildingCode = extractBuildingCode(text);
+    fields.building_code = extractBuildingCode(text); // Alternative field name
+    fields.addressCode = extractAddressCode(text);
+    fields.address_code = extractAddressCode(text); // Alternative field name
     fields.buildingType = extractBuildingTypeAdvanced(text);
+    fields.building_type = extractBuildingTypeAdvanced(text); // Alternative field name
     fields.buildingYear = extractBuildingYear(text);
+    fields.building_year = extractBuildingYear(text); // Alternative field name
     fields.apartmentArea = extractApartmentArea(text);
+    fields.apartment_area = extractApartmentArea(text); // Alternative field name
     fields.floorLocated = extractFloorLocation(text);
+    fields.floor_located = extractFloorLocation(text); // Alternative field name
     fields.damageStatus = extractDamageStatus(text);
-    fields.buildingCoverage = extractBuildingCoverage(text);
-    fields.buildingCoverageAmount = extractBuildingCoverageAmount(text);
-    fields.discountSurchargeInfo = extractDiscountInfo(text);
+    fields.damage_status = extractDamageStatus(text); // Alternative field name
     fields.province = extractProvince(text);
     fields.insured_address = extractInsuredAddress(text);
+    fields.insuredAddress = extractInsuredAddress(text); // Alternative field name
     fields.insured_phone = extractInsuredPhone(text);
-    fields.plateNumber = extractPlateNumberFromText(text); // For levha no
+    fields.insuredPhone = extractInsuredPhone(text); // Alternative field name
+    fields.plateNumber = extractPlateNumberFromText(text); // For levha no in DASK
+    
   } else if (documentType === 'kasko' || documentType === 'trafik') {
-    // KASKO/TRAFİK specific fields
-    fields.plate_number = extractVehiclePlate(text);
+    // Vehicle Information
+    fields.vehicle_plate = extractVehiclePlate(text);
+    fields.vehiclePlate = extractVehiclePlate(text); // Alternative field name
+    fields.plate_number = extractVehiclePlate(text); // Alternative field name
     fields.vehicle_brand = extractVehicleBrandAdvanced(text);
+    fields.vehicleBrand = extractVehicleBrandAdvanced(text); // Alternative field name
     fields.vehicle_model = extractVehicleModelAdvanced(text);
+    fields.vehicleModel = extractVehicleModelAdvanced(text); // Alternative field name
     fields.vehicle_year = extractVehicleYearAdvanced(text);
-    fields.chassis_number = extractChassisNumber(text);
-    fields.motor_number = extractMotorNumber(text);
+    fields.vehicleYear = extractVehicleYearAdvanced(text); // Alternative field name
+    fields.vehicle_chassis = extractChassisNumber(text);
+    fields.vehicleChassis = extractChassisNumber(text); // Alternative field name
+    fields.chassis_number = extractChassisNumber(text); // Alternative field name
+    fields.vehicle_motor = extractMotorNumber(text);
+    fields.vehicleMotor = extractMotorNumber(text); // Alternative field name
+    fields.motor_number = extractMotorNumber(text); // Alternative field name
     fields.vehicle_value = extractVehicleValue(text);
+    fields.vehicleValue = extractVehicleValue(text); // Alternative field name
     fields.kasko_premium = extractKaskoPremium(text);
+    fields.kaskoPremium = extractKaskoPremium(text); // Alternative field name
     fields.mali_sorumluluk = extractMaliSorumluluk(text);
+    fields.maliSorumluluk = extractMaliSorumluluk(text); // Alternative field name
     fields.ferdi_kaza = extractFerdiKaza(text);
+    fields.ferdiKaza = extractFerdiKaza(text); // Alternative field name
     fields.hukuksal_koruma = extractHuksalKoruma(text);
+    fields.huksalKoruma = extractHuksalKoruma(text); // Alternative field name
+    
+  } else if (documentType === 'hasar' || documentType === 'ekspertiz') {
+    // Expert Information
+    fields.expertName = extractExpertName(text);
+    fields.expert_name = extractExpertName(text); // Alternative field name
+    fields.expertRegistry = extractExpertRegistry(text);
+    fields.expert_registry = extractExpertRegistry(text); // Alternative field name
+    
+    // Damage Information
+    fields.damageDate = extractDamageDate(text);
+    fields.damage_date = extractDamageDate(text); // Alternative field name
+    fields.damageLocation = extractDamageLocation(text);
+    fields.damage_location = extractDamageLocation(text); // Alternative field name
+    fields.damageDescription = extractDamageDescription(text);
+    fields.damage_description = extractDamageDescription(text); // Alternative field name
   }
   
   return fields;
@@ -266,14 +340,29 @@ function calculateConfidenceScore(text: string, fields: any): number {
 
 function extractPolicyNumberAdvanced(text: string): string | null {
   const patterns = [
+    // Pattern: Line with colon followed by 8-10 digits (typical policy number)
+    /:([0-9]{8,10})/g,
+    // Pattern: "Sigorta Sirketi Poliçe No" followed by number
     /Sigorta Sirketi Poliçe No\s*:?\s*([0-9]+)/i,
-    /(?:POLİÇE|POLICE|Poliçe)\s*(?:NO|No|NUMARASI|Numarası)\s*:?\s*([A-Z0-9\-\/\.]+)/i,
+    // Pattern: "Poliçe No" followed by number
+    /Poliçe No\s*:?\s*([0-9]+)/i,
+    // Generic policy pattern
     /Policy\s*(?:Number|No)\s*:?\s*([A-Z0-9\-\/\.]+)/i
   ];
   
   for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match && match[1]) return match[1].trim();
+    if (pattern.global) {
+      // For global patterns, get all matches and filter
+      const matches = [...text.matchAll(pattern)];
+      for (const match of matches) {
+        if (match[1] && match[1].length >= 8) {
+          return match[1].trim();
+        }
+      }
+    } else {
+      const match = text.match(pattern);
+      if (match && match[1]) return match[1].trim();
+    }
   }
   
   return null;
@@ -295,17 +384,25 @@ function extractDaskPolicyNumber(text: string): string | null {
 
 function extractInsuredNameAdvanced(text: string): string | null {
   const patterns = [
-    /Adi Soyadi\/Unvani\s+([A-ZÇĞIİÖŞÜ\s]+)/i,
-    /(?:SİGORTALI|SIGORTAL|Sigortalı)\s+(?:ADI|Adı)\s*\/?\s*(?:SOYADI|Soyadi|UNVANI|Unvani)?\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i,
-    /(?:INSURED|Insured)\s*(?:Name|NAME)\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i
+    // Pattern: "Adi Soyadi/Unvani" followed by name on same or next line
+    /Adi Soyadi\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Pattern: "SIGORTALI BILGILERI" section with name after
+    /SİGORTALI BILGILERI[\s\S]*?Adi Soyadi\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Generic name pattern after specific labels
+    /(?:SİGORTALI|SIGORTAL|Sigortalı)\s+(?:ADI|Adı)\s*\/?\s*(?:SOYADI|Soyadi|UNVANI|Unvani)?\s*:?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i
   ];
   
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match && match[1]) {
       const name = match[1].trim();
-      // Filter out common non-name patterns
-      if (name.length > 2 && !name.includes('BILGILERI') && !name.includes('TCKN')) {
+      // Filter out common non-name patterns and validate
+      if (name.length > 2 && 
+          !name.includes('BILGILERI') && 
+          !name.includes('TCKN') &&
+          !name.includes('VKN') &&
+          !name.includes('YKN') &&
+          /^[A-ZÇĞIİÖŞÜ\s]+$/.test(name)) {
         return name;
       }
     }
@@ -316,15 +413,25 @@ function extractInsuredNameAdvanced(text: string): string | null {
 
 function extractPolicyHolderName(text: string): string | null {
   const patterns = [
-    /Adi Soyadt\/Unvani\s+([A-ZÇĞIİÖŞÜ\s]+)/i,
-    /(?:SİGORTA ETTIREN|Sigorta Ettiren)\s+(?:ADI|Adi)\s*\/?\s*(?:SOYADI|Soyadi|UNVANI|Unvani)?\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i
+    // Pattern: "Adi Soyadt/Unvani" in SIGORTA ETTIREN section
+    /SİGORTA ETTIREN BILGILER[\s\S]*?Adi Soyadt\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Pattern: "Adi Soyadt/Unvani" followed by name
+    /Adi Soyadt\/Unvani\s*\n?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i,
+    // Generic policyholder pattern
+    /(?:SİGORTA ETTIREN|Sigorta Ettiren)\s+(?:ADI|Adi)\s*\/?\s*(?:SOYADI|Soyadi|UNVANI|Unvani)?\s*:?\s*([A-ZÇĞIİÖŞÜ]+(?:\s+[A-ZÇĞIİÖŞÜ]+)*)/i
   ];
   
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match && match[1]) {
       const name = match[1].trim();
-      if (name.length > 2 && !name.includes('BILGILERI')) {
+      // Validate name format and filter out unwanted patterns
+      if (name.length > 2 && 
+          !name.includes('BILGILERI') && 
+          !name.includes('TCKN') &&
+          !name.includes('VKN') &&
+          !name.includes('YKN') &&
+          /^[A-ZÇĞIİÖŞÜ\s]+$/.test(name)) {
         return name;
       }
     }
@@ -400,7 +507,11 @@ function extractPolicyPremium(text: string): string | null {
 
 function extractInsuranceCompany(text: string): string | null {
   const patterns = [
-    /Sigorta Sirketi Unvant?\s*:?\s*([A-ZÇĞIİÖŞÜ\s\.]+)/i,
+    // Pattern: Line starting with colon and containing "SIGORTA"
+    /:([A-ZÇĞIİÖŞÜ\s\.]+SIGORTA[A-ZÇĞIİÖŞÜ\s\.]*)/i,
+    // Pattern: "Sigorta Sirketi Unvani" followed by company name
+    /Sigorta Sirketi Unvant?\s*:?\s*([A-ZÇĞIİÖŞÜ\s\.]+?)(?:\n|Sigorta Sirketi Poliçe)/i,
+    // Generic insurance company pattern
     /(?:Insurance|INSURANCE)\s+(?:Company|COMPANY)\s*:?\s*([A-ZÇĞIİÖŞÜ\s\.]+)/i
   ];
   
@@ -408,7 +519,13 @@ function extractInsuranceCompany(text: string): string | null {
     const match = text.match(pattern);
     if (match && match[1]) {
       const company = match[1].trim();
-      if (company.length > 3 && !company.includes('BILGILERI')) {
+      // Validate company name and filter unwanted patterns
+      if (company.length > 5 && 
+          !company.includes('BILGILERI') && 
+          !company.includes('POLIÇE') &&
+          !company.includes('NO') &&
+          company.includes('SIGORTA') &&
+          /[A-ZÇĞIİÖŞÜ]/.test(company)) {
         return company;
       }
     }
@@ -838,6 +955,151 @@ function extractHuksalKoruma(text: string): string | null {
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+// Additional missing extraction functions
+
+function extractCompanyAddress(text: string): string | null {
+  const patterns = [
+    /(?:ŞİRKET ADRESİ|Şirket Adresi|Company Address)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-]+)/i,
+    /(?:ADRES|Address)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const address = match[1].trim();
+      if (address.length > 5) return address;
+    }
+  }
+  
+  return null;
+}
+
+function extractGrossPremium(text: string): string | null {
+  const patterns = [
+    /(?:BRÜT PRİM|Brüt Prim|Gross Premium)\s*:?\s*([\d\.,]+)/i,
+    /(?:TOPLAM TUTAR|Toplam Tutar|Total Amount)\s*:?\s*([\d\.,]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+function extractNetPremium(text: string): string | null {
+  const patterns = [
+    /(?:NET PRİM|Net Prim|Net Premium)\s*:?\s*([\d\.,]+)/i,
+    /(?:NET TUTAR|Net Tutar|Net Amount)\s*:?\s*([\d\.,]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+function extractTaxAmount(text: string): string | null {
+  const patterns = [
+    /(?:VERGİ TUTARI|Vergi Tutarı|Tax Amount)\s*:?\s*([\d\.,]+)/i,
+    /(?:KDV|Kdv)\s*:?\s*([\d\.,]+)/i,
+    /(?:TAX|Tax)\s*:?\s*([\d\.,]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+// Expert and Damage related functions for hasar/ekspertiz documents
+
+function extractExpertName(text: string): string | null {
+  const patterns = [
+    /(?:EKSPER ADI|Eksper Adı|Expert Name)\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i,
+    /(?:EKSPER|Expert)\s*:?\s*([A-ZÇĞIİÖŞÜ\s]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const name = match[1].trim();
+      if (name.length > 2 && /^[A-ZÇĞIİÖŞÜ\s]+$/.test(name)) {
+        return name;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function extractExpertRegistry(text: string): string | null {
+  const patterns = [
+    /(?:SİCİL NO|Sicil No|Registry No)\s*:?\s*([0-9]+)/i,
+    /(?:SİCİL NUMARASI|Sicil Numarası|Registry Number)\s*:?\s*([0-9]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+function extractDamageDate(text: string): string | null {
+  const patterns = [
+    /(?:HASAR TARİHİ|Hasar Tarihi|Damage Date)\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i,
+    /(?:KAZA TARİHİ|Kaza Tarihi|Accident Date)\s*:?\s*([0-9]{1,2}[\/\.\-][0-9]{1,2}[\/\.\-][0-9]{4})/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return null;
+}
+
+function extractDamageLocation(text: string): string | null {
+  const patterns = [
+    /(?:HASAR YERİ|Hasar Yeri|Damage Location)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-]+)/i,
+    /(?:KAZA YERİ|Kaza Yeri|Accident Location)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const location = match[1].trim();
+      if (location.length > 3) return location;
+    }
+  }
+  
+  return null;
+}
+
+function extractDamageDescription(text: string): string | null {
+  const patterns = [
+    /(?:HASAR TANIMI|Hasar Tanımı|Damage Description)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-\(\)]+)/i,
+    /(?:HASAR DETAYLARI|Hasar Detayları|Damage Details)\s*:?\s*([A-ZÇĞIİÖŞÜa-zçğıiöşü0-9\s\.\,\/\-\(\)]+)/i
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const description = match[1].trim();
+      if (description.length > 5) return description;
+    }
   }
   
   return null;

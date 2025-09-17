@@ -22,6 +22,10 @@ export const UNIVERSAL_FIELD_MAPPINGS: FieldMapping = {
     'daskPolicyNumber', 'reportNumber', 'dosya_no', 'Sigorta Sirketi Poliçe No',
     'DASK Pollçe No', 'DASK Policy Number'
   ],
+  daskPolicyNumber: [
+    'daskPolicyNumber', 'dask_policy_number', 'DASK Pollçe No', 'DASK Policy Number',
+    'dask_poliçe_no', 'deprem_poliçe_no'
+  ],
   
   // Dates
   startDate: [
@@ -114,6 +118,25 @@ export const UNIVERSAL_FIELD_MAPPINGS: FieldMapping = {
     'apartmentArea', 'daire_alanı', 'apartment_area', 'alan',
     'apartment_area', 'metrekare'
   ],
+  floorLocated: [
+    'floorLocated', 'floor_located', 'bulunduğu_kat', 'kat',
+    'floor_location', 'daire_katı'
+  ],
+  damageStatus: [
+    'damageStatus', 'damage_status', 'hasar_durumu', 'hasar_durum',
+    'damage_condition', 'hasar_bilgisi'
+  ],
+  province: [
+    'province', 'şehir', 'il', 'city', 'location', 'konum'
+  ],
+  insuredAddress: [
+    'insured_address', 'insuredAddress', 'sigortalı_adres', 'müşteri_adres',
+    'customer_address', 'adres_bilgisi'
+  ],
+  insuredPhone: [
+    'insured_phone', 'insuredPhone', 'sigortalı_telefon', 'müşteri_telefon',
+    'customer_phone', 'telefon_bilgisi'
+  ],
   
   // Financial Information
   policyPremium: [
@@ -139,6 +162,16 @@ export const UNIVERSAL_FIELD_MAPPINGS: FieldMapping = {
     'discountSurchargeInfo', 'baglanti_indirimi', 'hasarsizlik_orani',
     'ozel_musteri_indirimi', 'indirim_bilgileri', 'discount_info',
     'hasarsizlik_kademesi', 'indirim_oranı'
+  ],
+  
+  // Agency Information
+  agencyNumber: [
+    'agencyNumber', 'agency_number', 'acente_no', 'acente_numarası',
+    'agent_number', 'aracı_numarası'
+  ],
+  renewalNumber: [
+    'renewalNumber', 'renewal_number', 'yenileme_no', 'yenileme_numarası',
+    'renewal_count', 'yenileme_sayısı'
   ],
   
   // Expert Information (for damage/expertise reports)
@@ -177,8 +210,10 @@ export const DOCUMENT_TYPE_PRIORITIES: { [key: string]: string[] } = {
     'vehicleChassis', 'vehicleMotor', 'coverageType', 'coverageAmount'
   ],
   deprem: [
-    'buildingCode', 'addressCode', 'buildingType', 'buildingYear',
-    'apartmentArea', 'coverageType', 'coverageAmount'
+    'daskPolicyNumber', 'buildingCode', 'addressCode', 'buildingType', 
+    'buildingYear', 'apartmentArea', 'floorLocated', 'damageStatus',
+    'province', 'coverageType', 'coverageAmount', 'agencyNumber', 
+    'renewalNumber'
   ],
   hasar: [
     'expertName', 'expertRegistry', 'damageDate', 'damageLocation',
@@ -276,7 +311,15 @@ export function getFieldLabel(fieldName: string, documentType?: string): string 
     addressCode: 'Adres Kodu',
     buildingType: 'Bina Türü',
     buildingYear: 'Bina Yılı',
+    floorLocated: 'Bulunduğu Kat',
+    damageStatus: 'Hasar Durumu',
+    province: 'İl/Şehir',
+    insuredAddress: 'Sigortalı Adresi',
+    insuredPhone: 'Sigortalı Telefonu',
     apartmentArea: 'Daire Alanı',
+    daskPolicyNumber: 'DASK Poliçe No',
+    agencyNumber: 'Acente Numarası',
+    renewalNumber: 'Yenileme Numarası',
     policyPremium: 'Poliçe Primi',
     grossPremium: 'Brüt Prim',
     netPremium: 'Net Prim',
