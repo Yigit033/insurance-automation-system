@@ -212,7 +212,21 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
                           <Shield className="w-4 h-4 text-gray-500" />
                           <span className="text-sm font-medium">Güven Skoru:</span>
                         </div>
-                        <p className="text-sm text-gray-600">%{document.ocr_confidence || 'N/A'}</p>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-gray-700 w-16">
+                            %{(document.ocr_confidence * 100).toFixed(1).replace(/\.0$/, '')}
+                          </span>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="h-2.5 rounded-full" 
+                              style={{
+                                width: `${(document.ocr_confidence * 100).toFixed(1)}%`,
+                                backgroundColor: document.ocr_confidence > 0.7 ? '#10B981' : 
+                                               document.ocr_confidence > 0.4 ? '#F59E0B' : '#EF4444'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -327,6 +341,44 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
                               variant="ghost"
                               size="sm"
                               onClick={() => copyToClipboard(extractedFields.insured_tc_number || extractedFields.tc_number)}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {(extractedFields.policyholderStatus || extractedFields.policyholder_status) && (
+                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <Shield className="w-4 h-4 text-blue-500" />
+                            <span className="text-sm font-medium">Sigorta Ettiren Sıfatı:</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-700">{extractedFields.policyholderStatus || extractedFields.policyholder_status}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(extractedFields.policyholderStatus || extractedFields.policyholder_status)}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {(extractedFields.policyholderPhone || extractedFields.policyholder_phone) && (
+                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <Phone className="w-4 h-4 text-blue-500" />
+                            <span className="text-sm font-medium">Telefon:</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-700 font-mono">{extractedFields.policyholderPhone || extractedFields.policyholder_phone}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(extractedFields.policyholderPhone || extractedFields.policyholder_phone)}
                             >
                               <Copy className="w-3 h-3" />
                             </Button>
@@ -592,6 +644,25 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
                               variant="ghost"
                               size="sm"
                               onClick={() => copyToClipboard(getFieldValue('endDate', extractedFields))}
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {hasFieldValue('issueDate', extractedFields) && (
+                        <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-orange-500" />
+                            <span className="text-sm font-medium">{getFieldLabel('issueDate', documentType)}:</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-700">{getFieldValue('issueDate', extractedFields)}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(getFieldValue('issueDate', extractedFields))}
                             >
                               <Copy className="w-3 h-3" />
                             </Button>
@@ -1244,8 +1315,10 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
 
                         {/* Sigorta Ettiren Bilgileri */}
                         <div className="space-y-4 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                          <h4 className="text-lg font-bold text-blue-600 border-b-2 pb-3 flex items-center">Sigorta Ettiren Bilgileri</h4>
-                          
+                          <h4 className="text-lg font-bold text-blue-600 border-b-2 pb-3 flex items-center">
+                            Sigorta Ettiren Bilgileri
+                          </h4>
+
                           {extractedFields.policyholderName && (
                             <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                               <div className="flex items-center space-x-2">
@@ -1253,7 +1326,9 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
                                 <span className="text-sm font-medium">Ad Soyad/Unvan:</span>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-700">{extractedFields.policyholderName}</span>
+                                <span className="text-sm text-gray-700">
+                                  {extractedFields.policyholderName}
+                                </span>
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -1264,19 +1339,23 @@ export const DocumentDetailModal = ({ document, isOpen, onClose }: DocumentDetai
                               </div>
                             </div>
                           )}
-                          
-                          {extractedFields.policyholderTC && (
+
+                          {(extractedFields.tc_number || extractedFields.tcNumber) && (
                             <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                               <div className="flex items-center space-x-2">
                                 <Shield className="w-4 h-4 text-blue-500" />
-                                <span className="text-sm font-medium">TCKN/VKN/YKN:</span>
+                                <span className="text-sm font-medium">TC Kimlik No:</span>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-700 font-mono">{extractedFields.policyholderTC}</span>
+                                <span className="text-sm text-gray-700 font-mono">
+                                  {extractedFields.tc_number || extractedFields.tcNumber}
+                                </span>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => copyToClipboard(extractedFields.policyholderTC)}
+                                  onClick={() =>
+                                    copyToClipboard(extractedFields.tc_number || extractedFields.tcNumber)
+                                  }
                                 >
                                   <Copy className="w-3 h-3" />
                                 </Button>

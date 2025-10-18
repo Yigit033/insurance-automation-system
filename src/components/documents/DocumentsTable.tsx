@@ -328,13 +328,21 @@ const DocumentsTable = () => {
                       </TableCell>
                       
                       <TableCell>
-                        {doc.ocr_confidence ? (
-                          <div className="flex items-center gap-1">
-                            <div className={`w-2 h-2 rounded-full ${
-                              doc.ocr_confidence >= 90 ? 'bg-green-500' :
-                              doc.ocr_confidence >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`} />
-                            <span className="text-sm font-medium">{doc.ocr_confidence}%</span>
+                        {doc.ocr_confidence !== undefined ? (
+                          <div className="flex items-center gap-2 w-24">
+                            <span className="text-sm font-medium">
+                              %{(doc.ocr_confidence * 100).toFixed(1).replace(/\.0$/, '')}
+                            </span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="h-2 rounded-full"
+                                style={{
+                                  width: `${(doc.ocr_confidence * 100).toFixed(1)}%`,
+                                  backgroundColor: doc.ocr_confidence > 0.7 ? '#10B981' : 
+                                                 doc.ocr_confidence > 0.4 ? '#F59E0B' : '#EF4444'
+                                }}
+                              />
+                            </div>
                           </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
