@@ -116,7 +116,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Kayıt Başarılı!",
-          description: "Hesabınız oluşturuldu. E-posta onayı gerekiyorsa lütfen e-postanızı kontrol edin. Geliştirme için Supabase ayarlarından e-posta onayını devre dışı bırakabilirsiniz."
+          description: "Hesabınız başarıyla oluşturuldu. Giriş bilgilerinizi kimseyle paylaşmayın!"
         });
         // Clear form
         setFormData({
