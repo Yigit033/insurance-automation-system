@@ -24,7 +24,14 @@ app = FastAPI(
 # CORS configuration for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "https://insurance-automation-system.vercel.app",
+        "https://*.vercel.app",  # All Vercel preview deployments
+        "*"  # Allow all origins (for development)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
