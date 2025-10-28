@@ -169,13 +169,32 @@ vercel
 
 ### OCR Service Deployment (Render.com)
 
+**Option 1: Using render.yaml (Recommended)**
+
+1. **Push to GitHub** with `render.yaml` file in root
+2. **Create New Web Service** on Render.com
+3. **Connect Repository**: Select `Yigit033/insurance-automation-system`
+4. **Auto-detect**: Render will use `render.yaml` configuration
+5. **Deploy**
+
+**Option 2: Manual Configuration**
+
 1. **Create New Web Service** on Render.com
-2. **Connect Repository**
-3. **Configure Build Settings**:
+2. **Connect Repository**: `Yigit033/insurance-automation-system`
+3. **Configure Settings**:
+   - **Name**: `insurance-ocr-service`
+   - **Runtime**: `Python 3`
    - **Build Command**: `cd ocr_service && pip install -r requirements.txt`
    - **Start Command**: `cd ocr_service && uvicorn app:app --host 0.0.0.0 --port $PORT`
-4. **Add Environment Variables** (if needed)
+4. **Add Environment Variables**:
+   - `PYTHON_VERSION`: `3.11.9`
 5. **Deploy**
+
+**Important Files for Render.com:**
+- `ocr_service/runtime.txt` → Python version (3.11.9)
+- `ocr_service/apt-packages.txt` → System dependencies (tesseract, poppler)
+- `ocr_service/requirements.txt` → Python packages
+- `render.yaml` → Deployment configuration
 
 Update frontend `.env` with deployed OCR service URL:
 ```env

@@ -77,15 +77,43 @@ npm run dev
 
 This project is built with:
 
+**Frontend:**
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Database & Auth)
+
+**Backend (OCR Service):**
+- Python 3.11
+- FastAPI
+- Tesseract OCR
+- PaddleOCR
+- pdf2image
+- OpenCV
 
 ## How can I deploy this project?
 
+**Frontend (Vercel):**
+
 Simply open [Lovable](https://lovable.dev/projects/7e885668-8f86-4733-9eb9-b5ade03c0002) and click on Share -> Publish.
+
+Or deploy manually to Vercel:
+```bash
+npm run build
+vercel --prod
+```
+
+**Backend OCR Service (Render.com):**
+
+1. Push code to GitHub
+2. Create new Web Service on [Render.com](https://render.com)
+3. Connect repository: `Yigit033/insurance-automation-system`
+4. Render will auto-detect `render.yaml` configuration
+5. Deploy!
+
+See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed deployment instructions.
 
 ## Can I connect a custom domain to my Lovable project?
 
